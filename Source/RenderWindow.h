@@ -30,17 +30,22 @@ public:
 	void input(Entity& paddle, Entity& ball, Entity bricks[]);
 	void update(Entity& paddle, Entity& ball, Entity bricks[]);
 	void clear();
+	void write(string text, SDL_Color textColor, const int& x , const int& y);
 	void render(Entity& entity, float = 1.0, float = 1.0);
 	void display();
 	void clean();
-	bool isRunning = false;
+	bool running() {
+		return isRunning;
+	}
 private:
-	int count = 0;
-	SDL_Window* window = nullptr;
-	SDL_Renderer* renderer = nullptr;
-	TTF_Font* font = nullptr;
+	bool isRunning = false;
+	SDL_Window* window = NULL;
+	SDL_Renderer* renderer = NULL;
+	TTF_Font* font = NULL;
 	int fontSize=16;
 	bool gameStarted = false;
+	int liveCount = 3;
+	SDL_Rect lives;
 };
 
 #endif

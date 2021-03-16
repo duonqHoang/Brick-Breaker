@@ -1,17 +1,18 @@
 #include "RenderWindow.h"
 
 RenderWindow::RenderWindow(const char* title, int posx, int posy, int w, int h) {
-	if (SDL_Init(SDL_INIT_EVERYTHING) != 0)
+	if (SDL_Init(SDL_INIT_EVERYTHING) != 0) 
 		cout << "SDL_Init error" <<' '<<SDL_GetError()<<endl;
 	window = SDL_CreateWindow(title, posx, posy, w, h, SDL_WINDOW_SHOWN);
 	if (!window)
 		cout << "Can't create Window" << endl;
-	renderer = SDL_CreateRenderer(window, -1, 0);
+	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 	if (!renderer) {
 		cout << "Can't create Renderer" << endl;
 	}
-	isRunning = true;
+	if (TTF_Init() == -1) printf("SDL_ttf could not initialize! SDL_ttf Error: %s\n", TTF_GetError());
 	font = TTF_OpenFont("Resources/font.ttf", fontSize);
+	isRunning = true;
 }
 
 SDL_Texture* RenderWindow::loadTexture(const char* path) {
@@ -22,15 +23,16 @@ SDL_Texture* RenderWindow::loadTexture(const char* path) {
 }
 
 void RenderWindow::resetGame(Entity& paddle, Entity& ball, Entity bricks[]) {
-	gameStarted = false;
+	liveCount = 3;
 	ball.Vx = 0;
 	ball.Vy = 0;
 	paddle.x = window_w / 2 - (paddle_w) / 2;
 	paddle.y = window_h - paddle_h - 16;
 	ball.x = window_w / 2 - ball_r / 2;
 	ball.y = window_h - (paddle_h + ball_r) - 16;
-	for (int i = 0; i < brick_cols * brick_rows; ++i)
+	for (int i = 0; i < brick_cols * brick_rows; ++i) 
 		bricks[i].isActive = true;
+	gameStarted = false;
 }
 
 void RenderWindow::input(Entity& paddle, Entity& ball, Entity bricks[]) {
@@ -55,7 +57,7 @@ void RenderWindow::input(Entity& paddle, Entity& ball, Entity bricks[]) {
 }
 
 void RenderWindow::update(Entity& paddle, Entity& ball, Entity bricks[]) {
-
+	
 	if (SDL_HasIntersection(&(ball.rect), &(paddle.rect))) {
 		double rel = (paddle.x + (paddle_w / 2)) - (ball.x + (ball_r / 2));
 		double norm = rel / (paddle_w / 2);
@@ -67,6 +69,9 @@ void RenderWindow::update(Entity& paddle, Entity& ball, Entity bricks[]) {
 	if (ball.x + ball_r >= window_w) ball.Vx = -ball.Vx;
 	if (ball.x <= 0) ball.Vx = -ball.Vx;
 	if (ball.y <= 0) ball.Vy = -ball.Vy;
+	if (ball.y > window_h) {
+
+	}
 	ball.x += ball.Vx;
 	ball.y += ball.Vy;
 
@@ -82,21 +87,37 @@ void RenderWindow::update(Entity& paddle, Entity& ball, Entity bricks[]) {
 		}
 	}
 	if (brickHit) {
-		//if (ball.y <= bricks[temp].y) { ball.Vy = -ball.Vy;}
-		//if (ball.y >= bricks[temp].y) { ball.Vy = -ball.Vy;}
-
-
-		double rel = (bricks[temp].x + (brick_w / 2)) - (ball.x + (ball_r / 2));
+		if (ball.y <= bricks[temp].y) { ball.Vy = -ball.Vy;}
+		if (ball.y >= bricks[temp].y) { ball.Vy = -ball.Vy;}
+		
+		
+		/*double rel = (bricks[temp].x + (brick_w / 2)) - (ball.x + (ball_r / 2));
 		double norm = rel / (brick_w / 2);
 		double bounce = norm * (2* PI / 12);
 		ball.Vy = ball_speed * cos(bounce);
-		ball.Vx = ball_speed * -sin(bounce);
+		ball.Vx = ball_speed * -sin(bounce); */
 	}
 }
 
 void RenderWindow::clear() {
 	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 	SDL_RenderClear(renderer);
+}
+
+void RenderWindow::write(string text, SDL_Color textColor, const int& x, const int& y) {
+	SDL_Surface* textSurface = TTF_RenderText_Solid(font, text.c_str(), textColor);
+	if (textSurface == NULL) cout << "Failed to render text surface! Error: " << TTF_GetError();
+	else {
+		SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, textSurface);
+		lives.w = textSurface->w;
+		lives.h = textSurface->h;
+		lives.x = x;
+		lives.y = y;
+
+		SDL_FreeSurface(textSurface);
+		SDL_RenderCopy(renderer, texture, NULL, &lives);
+		SDL_DestroyTexture(texture);
+	}
 }
 
 void RenderWindow::render(Entity& entity, float scale_w, float scale_h) {

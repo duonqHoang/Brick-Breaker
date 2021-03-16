@@ -26,7 +26,7 @@ int main(int argc, char* argv[]) {
 	paddle.setSize(paddle_w , paddle_h);
 	ball.setSize(ball_r  , ball_r  );
 
-	while (gameWindow.isRunning) {
+	while (gameWindow.running()) {
 		frameStart = SDL_GetTicks();
 		gameWindow.clear();
 		gameWindow.input(paddle, ball, bricks);
