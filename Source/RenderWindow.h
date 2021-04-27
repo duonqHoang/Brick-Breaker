@@ -7,6 +7,8 @@
 #include <SDL_ttf.h>
 #include <SDL_mixer.h>
 #include <iostream>
+#include <fstream>
+#include <vector>
 #include <cmath>
 
 using namespace std;
@@ -21,8 +23,12 @@ public:
 	RenderWindow(const char* title, int posx, int posy, int w, int h);
 	void loadBackground();
 	SDL_Texture* loadTexture(const char* path);
-	void position(Entity& paddle, Entity& ball, Entity bricks[]);
+	void loadHighscore(const char* path);
+	void saveHighScore(const char* path);
+	void position(Entity& paddle, Entity& ball);
+	void setBricks(Entity bricks[]);
 	void resetGame(Entity& paddle, Entity& ball, Entity bricks[]);
+	void changeLevel(Entity bricks[], const int& newLevel);
 	double distanceSquared(const int& x1, const int& y1, const int& x2, const int& y2 );
 	collisionSide checkCollision(Entity& ball, Entity& rect);
 	void input(Entity& paddle, Entity& ball, Entity bricks[]);
@@ -47,6 +53,10 @@ private:
 	int livesCount = 3;
 	SDL_Rect textRect;
 	Mix_Chunk* brickHitSound;
+	//Mix_Chunk* paddleHitSound;
+	int level = 1;
+	int score = 0;
+	int highscore = 0;
 };
 
 #endif

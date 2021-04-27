@@ -16,7 +16,7 @@ RenderWindow::RenderWindow(const char* title, int posx, int posy, int w, int h) 
 	if( Mix_OpenAudio( 44100, MIX_DEFAULT_FORMAT, 2, 2048 ) < 0 )
         cout<< "SDL_mixer could not initialize! SDL_mixer Error: %s\n"<< Mix_GetError();
     brickHitSound = Mix_LoadWAV("Assets/brickHit.wav");
-    if (brickHitSound == NULL) cout<<"failed to load sound effect"<<endl;
+    //paddleHitSound = Mix_LoadWAV("Assets/paddleHit.wav");
 	isRunning = true;
 
 }
@@ -26,6 +26,21 @@ SDL_Texture* RenderWindow::loadTexture(const char* path) {
 	texture = IMG_LoadTexture(renderer, path);
 	if (texture == NULL) cout << "Failed at loading texture" << endl;
 	return texture;
+}
+
+void RenderWindow::loadHighscore(const char* path){
+    ifstream infile;
+    infile.open(path);
+    infile>>highscore;
+    infile.close();
+}
+
+void RenderWindow::saveHighScore(const char* path){
+    ofstream outfile;
+    outfile.open(path);
+    outfile.seekp(0);
+    outfile<<highscore<<endl;
+    outfile.close();
 }
 
 void RenderWindow::loadBackground(){
@@ -41,7 +56,7 @@ void RenderWindow::loadBackground(){
         }
 };
 
-void RenderWindow::position(Entity& paddle, Entity& ball, Entity bricks[]) {
+void RenderWindow::position(Entity& paddle, Entity& ball) {
     ball.Vx = 0;
 	ball.Vy = 0;
 	ball.speed = 8;
@@ -52,13 +67,45 @@ void RenderWindow::position(Entity& paddle, Entity& ball, Entity bricks[]) {
     ballFired = false;
 }
 
+void RenderWindow::setBricks(Entity bricks[]){
+    for (int i = 0; i < brick_cols * brick_rows; ++i)
+        if (!bricks[i].isActive)
+            bricks[i].isActive = true;
+}
+
 void RenderWindow::resetGame(Entity& paddle, Entity& ball, Entity bricks[]) {
 	livesCount = 3;
-	position(paddle,ball,bricks);
-	for (int i = 0; i < brick_cols * brick_rows; ++i)
-		bricks[i].isActive = true;
+	level = 1;
+	score = 0;
+	changeLevel(bricks,level);
+	position(paddle,ball);
 	gameStarted = false;
 }
+
+void RenderWindow::changeLevel(Entity bricks[], const int& newLevel){
+    setBricks(bricks);
+    switch (newLevel){
+    case 1:
+        for (int i = 30;i<brick_cols * brick_rows;++i) bricks[i].isActive = false;
+        break;
+    case 2:
+        for (int i = 0;i<60;++i) if (i%2 == 0) bricks[i].isActive = false;
+        break;
+    case 3:
+        for (int i=0; i<60; ++i) if (i%5 == 1 || i%5 == 3) bricks[i].isActive = false;
+        break;
+    case 4:{
+        vector<int> disabled = {0,1,3,4,5,9,16,17,18,21,22,23,26,27,28,31,32,33,36,37,38,41,42,43,50,54,55,56,58,59,36,37,43};
+        for (int i = 0;i<disabled.size();++i) bricks[disabled[i]].isActive = false;
+        break;
+        }
+    case 5:{
+        vector<int> disabled = {0,2,4,5,9,45,49,50,54,55,56,58,59};
+        for (int i = 0;i<disabled.size();++i) bricks[disabled[i]].isActive = false;
+        break;
+        }
+    }
+};
 
 void RenderWindow::write(string text, SDL_Color textColor, const int& x, const int& y) {
 	SDL_Surface* textSurface = TTF_RenderText_Solid(font, text.c_str(), textColor);
@@ -67,7 +114,7 @@ void RenderWindow::write(string text, SDL_Color textColor, const int& x, const i
 		SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, textSurface);
 		textRect.w = textSurface->w;
 		textRect.h = textSurface->h;
-		textRect.x = x - textRect.w/2;
+		textRect.x = x;
 		textRect.y = y;
 
 		SDL_FreeSurface(textSurface);
@@ -108,7 +155,6 @@ collisionSide RenderWindow::checkCollision(Entity& ball, Entity& rect){
     {
         cY = ball.y;
     }
-
     //If the closest point is inside the circle
     if( distanceSquared( ball.x, ball.y, cX, cY ) < ball_r * ball_r )
     {
@@ -119,7 +165,6 @@ collisionSide RenderWindow::checkCollision(Entity& ball, Entity& rect){
             return horizontal;
         else return vertical;
     }
-
     //If the shapes have not collided
     return none;
 }
@@ -150,17 +195,20 @@ void RenderWindow::update(Entity& paddle, Entity& ball, Entity bricks[]) {
         resetGame(paddle, ball, bricks);
         return;
     }
-
+    static int combo = 0;
 	if (checkCollision(ball, paddle) == vertical) {
 		double rel = (paddle.x + (paddle_w / 2)) - (ball.x + (ball_r / 2));
 		double norm = rel / (paddle_w / 2);
 		double bounce = norm * (5 * PI / 12);
 		ball.speed += 0.3;
 		ball.Vy = -ball.speed * cos(bounce);
+		if (ball.Vy > -2) ball.Vy =-2;
 		ball.Vx = ball.speed * -sin(bounce);
+		combo = 0;
 	}
 	else if (checkCollision(ball, paddle) == horizontal){
         ball.Vx = -ball.Vx;
+        combo = 0;
 	}
 
 	if (ball.x + ball_r >= window_w) ball.Vx = -ball.Vx;
@@ -168,7 +216,7 @@ void RenderWindow::update(Entity& paddle, Entity& ball, Entity bricks[]) {
 	if (ball.y - ball_r <= 0) ball.Vy = -ball.Vy;
 	if (ball.y + ball_r > window_h) {
         livesCount--;
-        position(paddle,ball,bricks);
+        position(paddle,ball);
 	}
 	ball.x += ball.Vx;
 	ball.y += ball.Vy;
@@ -181,14 +229,19 @@ void RenderWindow::update(Entity& paddle, Entity& ball, Entity bricks[]) {
             ball.Vy = -ball.Vy;
             bricks[i].isActive = false;
             Mix_PlayChannel(-1,brickHitSound,0);
+            combo++;
+            score+= combo;
+            break;
 		}
 		else if (checkCollision(ball,bricks[i]) == horizontal && bricks[i].isActive){
             ball.Vx = -ball.Vx;
             bricks[i].isActive = false;
             Mix_PlayChannel(-1,brickHitSound,0);
+            combo++;
+            score+= combo;
+            break;
 		}
 	}
-
 	bool allBroken = true;
 	for(int i=0;i<brick_cols*brick_rows;++i){
         if (bricks[i].isActive){
@@ -197,8 +250,13 @@ void RenderWindow::update(Entity& paddle, Entity& ball, Entity bricks[]) {
         }
 	}
 	if (allBroken){
-    position(paddle, ball, bricks);
+    position(paddle, ball);
+    level++;
+    if(level > 4) level =1;
+    changeLevel(bricks,level);
 	}
+
+	if (score > highscore) highscore = score;
 }
 
 void RenderWindow::clear() {
@@ -206,7 +264,6 @@ void RenderWindow::clear() {
 }
 
 void RenderWindow::render(Entity& entity) {
-
 	SDL_Rect srcRect;
 	srcRect.x = entity.getCurrentFrame().x;
 	srcRect.y = entity.getCurrentFrame().y;
@@ -235,14 +292,20 @@ void RenderWindow::renderBall(Entity& ball){
 
 void RenderWindow::display() {
     SDL_Color textColor = {255,255,255};
-    if (!ballFired) write ("Press Space !",textColor, window_w/2, window_h - 200);
-    //textColor = {255,0,255};
-	write("Lives: ",textColor,window_w - 150,20);
-	write(to_string(livesCount), textColor,window_w -50,20);
+    if (!ballFired) write ("Press Space to Start!",textColor, 105, window_h - 200);
+	write("Score:",textColor,10,20);
+	write(to_string(score),textColor,160,20);
+	write("Highscore:",textColor,10,60);
+	write(to_string(highscore),textColor,250,60);
+	write("Level:",textColor,window_w -180,20);
+	write(to_string(level),textColor,window_w - 30,20);
+	write("Lives:",textColor,window_w - 180,60);
+	write(to_string(livesCount), textColor,window_w -30,60);
 	SDL_RenderPresent(renderer);
 }
 
 void RenderWindow::clean() {
+    saveHighScore("Assets/highscore.txt");
     Mix_FreeChunk(brickHitSound);
     brickHitSound = NULL;
 	TTF_CloseFont(font);

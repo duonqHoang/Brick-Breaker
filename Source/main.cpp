@@ -21,12 +21,13 @@ int main(int argc, char* argv[]) {
 						brickTex};
 			bricks[i].setSize(brick_w, brick_h);
 	}
-
 	paddle.setSize(paddle_w , paddle_h);
 	ball.setSize(ball_r*2, ball_r*2 );
 
     ball.speed = ball_speed;
     paddle.speed = paddle_speed;
+    gameWindow.changeLevel(bricks,1);
+    gameWindow.loadHighscore("Assets/highscore.txt");
 
 	while (gameWindow.running()) {
 		frameStart = SDL_GetTicks();

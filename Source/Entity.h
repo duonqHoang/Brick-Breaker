@@ -3,13 +3,12 @@
 
 #include <SDL.h>
 
-
 enum parameters{
     window_w = 64*11,
     window_h = 64*13,
     brick_w = 128,
     brick_h = 32,
-    brick_rows = 6,
+    brick_rows = 12,
     brick_cols = 5,
     paddle_w = 156,
     paddle_h = 24,
