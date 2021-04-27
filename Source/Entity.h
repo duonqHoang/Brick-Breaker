@@ -3,21 +3,32 @@
 
 #include <SDL.h>
 
-const int brick_w = 100;
-const int brick_h = 25;
 
-const int paddle_w = 2* 96;
-const int paddle_h = 16;
+enum parameters{
+    window_w = 64*11,
+    window_h = 64*13,
+    brick_w = 128,
+    brick_h = 32,
+    brick_rows = 6,
+    brick_cols = 5,
+    paddle_w = 156,
+    paddle_h = 24,
+    ball_r = 32/2,
+    ball_speed = 8,
+    paddle_speed = 8
+};
 
-const int ball_r = 32;
-const int paddle_speed = 8;
-const int ball_speed = 8;
+enum collisionSide{
+    horizontal,
+    vertical,
+    none
+};
 
 class Entity {
 public:
 	bool isActive = true;
-	int x, y;
-	int Vx = 0, Vy = 0;
+	float x, y;
+	float Vx = 0, Vy = 0, speed = 0;
 	Entity(const int& p_x, const int& p_y, SDL_Texture* p_tex);
 	Entity();
 	int getW();
@@ -28,7 +39,7 @@ public:
 	SDL_Rect rect;
 private:
 	SDL_Rect currentFrame;
-	SDL_Texture* tex = nullptr;
+	SDL_Texture* tex = NULL;
 };
 
 #endif
