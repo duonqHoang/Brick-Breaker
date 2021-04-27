@@ -20,6 +20,8 @@ Cách chơi:
 	
 	- Phá hết gạch sẽ sang level mới (Hiện chỉ có 5 level)
 
+Điểm tự chấm: ~8 điểm
+
 Tham khảo:
 	
 	- Lazyfoo: load nhạc, kiểm tra va chạm, sử dụng SDL_ttf 
