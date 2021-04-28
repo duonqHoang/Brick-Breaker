@@ -52,11 +52,12 @@ private:
 	bool ballFired = false;
 	int livesCount = 3;
 	SDL_Rect textRect;
-	Mix_Chunk* brickHitSound;
-	//Mix_Chunk* paddleHitSound;
 	int level = 1;
 	int score = 0;
 	int highscore = 0;
+
+	Mix_Chunk* brickHitSound;
+	Mix_Chunk* paddleHitSound;
 };
 
 #endif

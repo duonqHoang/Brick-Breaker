@@ -16,7 +16,7 @@ RenderWindow::RenderWindow(const char* title, int posx, int posy, int w, int h) 
 	if( Mix_OpenAudio( 44100, MIX_DEFAULT_FORMAT, 2, 2048 ) < 0 )
         cout<< "SDL_mixer could not initialize! SDL_mixer Error: %s\n"<< Mix_GetError();
     brickHitSound = Mix_LoadWAV("Assets/brickHit.wav");
-    //paddleHitSound = Mix_LoadWAV("Assets/paddleHit.wav");
+    paddleHitSound = Mix_LoadWAV("Assets/paddleHit.wav");
 	isRunning = true;
 
 }
@@ -59,7 +59,7 @@ void RenderWindow::loadBackground(){
 void RenderWindow::position(Entity& paddle, Entity& ball) {
     ball.Vx = 0;
 	ball.Vy = 0;
-	ball.speed = 8;
+	ball.speed = ball_speed;
 	paddle.x = window_w / 2 - (paddle_w) / 2;
 	paddle.y = window_h - paddle_h - 16;
 	ball.x = window_w / 2;
@@ -204,6 +204,7 @@ void RenderWindow::update(Entity& paddle, Entity& ball, Entity bricks[]) {
 		ball.Vy = -ball.speed * cos(bounce);
 		if (ball.Vy > -2) ball.Vy =-2;
 		ball.Vx = ball.speed * -sin(bounce);
+		Mix_PlayChannel(-1, paddleHitSound, 0);
 		combo = 0;
 	}
 	else if (checkCollision(ball, paddle) == horizontal){
