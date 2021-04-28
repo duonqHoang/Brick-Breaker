@@ -6,6 +6,8 @@ Các chức năng chính của SDL2 và hoạt động của game (renderer, cá
 
 Khai báo, khởi tạo, nhập highscore, vòng lặp game, xuất highscore, xóa dữ liệu và thoát game.
 
+Demo: https://youtu.be/pySWRKHNbTY
+
 Cách chơi:
 	
 	- Sử dụng nút sang trái/phải để điều khiển thanh trượt bên dưới.
