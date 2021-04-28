@@ -56,6 +56,7 @@ private:
 	int score = 0;
 	int highscore = 0;
 
+    //Mix_Music* bgMusic;
 	Mix_Chunk* brickHitSound;
 	Mix_Chunk* paddleHitSound;
 };

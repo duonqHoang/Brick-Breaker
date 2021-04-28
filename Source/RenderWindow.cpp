@@ -253,10 +253,9 @@ void RenderWindow::update(Entity& paddle, Entity& ball, Entity bricks[]) {
 	if (allBroken){
     position(paddle, ball);
     level++;
-    if(level > 5) level =1;
+    if(level > max_level) level =1;
     changeLevel(bricks,level);
 	}
-
 	if (score > highscore) highscore = score;
 }
 

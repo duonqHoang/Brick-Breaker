@@ -14,7 +14,8 @@ enum parameters{
     paddle_h = 24,
     ball_r = 32/2,
     ball_speed = 8,
-    paddle_speed = 8
+    paddle_speed = 8,
+    max_level = 5
 };
 
 enum collisionSide{
