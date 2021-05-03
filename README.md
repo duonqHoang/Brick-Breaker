@@ -39,8 +39,6 @@ Phát triển ở các phiên bản sau:
 	- Menu điều khiển
 	
 	- Thêm nhạc nền, hiệu ứng và có thể điều chỉnh được
-	
-	- Tăng sức mạnh khi phá gạch đặc biệt (thêm bóng, giảm tốc độ bóng...)
 
 	- Chế độ chơi mới
 	
